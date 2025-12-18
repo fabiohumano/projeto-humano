@@ -1,325 +1,375 @@
-<!DOCTYPE html>
-<html lang="pt-PT">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fabio Benedetti | Projeto HUMANO Studio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #050505;
-            color: #f4f4f5;
-            overflow-x: hidden;
-        }
+import React, { useState, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { 
+  getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, 
+  collection, arrayUnion, arrayRemove 
+} from 'firebase/firestore';
+import { 
+  Mic2, Music, Play, Cpu, Users, Mail, MapPin, 
+  Instagram, Youtube, Headphones, Volume2, Waves, 
+  Disc, ArrowRight, Settings, Save, Plus, Trash2, 
+  MessageSquare, Camera, CheckCircle, Smartphone
+} from 'lucide-react';
 
-        .animate-spin-slow {
-            animation: spin 20s linear infinite;
-        }
+// Firebase Configuration (Provided by environment)
+const firebaseConfig = JSON.parse(__firebase_config);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+const App = () => {
+  const [view, setView] = useState('portfolio'); // 'portfolio' ou 'admin'
+  const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState(null);
+  const [siteData, setSiteData] = useState({
+    heroTitle: "A ALMA DA MÚSICA É HUMANA.",
+    heroDesc: "Produção musical, mixagem e masterização. O medo rouba sonhos, a música liberta-os.",
+    phone: "32991064759",
+    email: "humanoprojeto@gmail.com",
+    instagram: "fabio.humano",
+    youtube: "fabiobndtt",
+    spotify: "",
+    tiktok: "fabiohumano",
+    videos: [],
+    testimonials: [],
+    gallery: []
+  });
 
-        .waveform-bar {
-            animation: bounce 0.8s ease-in-out infinite;
-        }
+  // Auth & Firestore Sync
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        await signInAnonymously(auth);
+      } catch (err) {
+        console.error("Erro na autenticação:", err);
+      }
+    };
+    initAuth();
 
-        @keyframes bounce {
-            0%, 100% { height: 20%; }
-            50% { height: 100%; }
-        }
+    const unsubscribeAuth = onAuthStateChanged(auth, setUser);
+    
+    // Sincronização em tempo real com o Firestore
+    const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'config');
+    const unsubscribeData = onSnapshot(configRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setSiteData(prev => ({ ...prev, ...docSnap.data() }));
+      } else {
+        // Setup inicial se não existir
+        setDoc(configRef, siteData);
+      }
+    });
 
-        .scroll-smooth {
-            scroll-behavior: smooth;
-        }
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
 
-        .glass-card {
-            background: rgba(15, 15, 15, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .glass-card:hover {
-            border-color: rgba(245, 158, 11, 0.4);
-            transform: translateY(-8px);
-            background: rgba(20, 20, 20, 0.8);
-        }
+    return () => {
+      unsubscribeAuth();
+      unsubscribeData();
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
-        .bg-studio-grid {
-            background-image: radial-gradient(circle, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
+  // Funções de Gravação (Admin)
+  const handleSaveConfig = async () => {
+    if (!user) return;
+    const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'config');
+    await updateDoc(configRef, siteData);
+    alert("Configurações gravadas com sucesso!");
+  };
 
-        .brand-icon {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
-        }
-    </style>
-</head>
-<body class="scroll-smooth bg-studio-grid">
+  const addVideo = async (url) => {
+    if (!url) return;
+    const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'config');
+    await updateDoc(configRef, { videos: arrayUnion(url) });
+  };
 
-    <!-- Background Decoration -->
-    <div class="fixed inset-0 opacity-10 pointer-events-none overflow-hidden z-0">
-        <svg class="w-full h-full" viewBox="0 0 1440 800" xmlns="http://www.w3.org/2000/svg">
-            <path fill="none" stroke="white" stroke-width="0.5" d="M0,400 Q360,100 720,400 T1440,400" />
-            <path fill="none" stroke="amber" stroke-width="0.2" d="M0,450 Q360,150 720,450 T1440,450" />
-        </svg>
-    </div>
+  const removeVideo = async (url) => {
+    const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'config');
+    await updateDoc(configRef, { videos: arrayRemove(url) });
+  };
 
-    <!-- Navigation -->
-    <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300 py-6 px-6">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2 group cursor-pointer">
-                <div class="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center group-hover:rotate-90 transition-transform shadow-xl shadow-amber-500/20">
-                    <i data-lucide="disc" class="text-black w-7 h-7"></i>
-                </div>
-                <div class="flex flex-col leading-none">
-                    <span class="text-xl font-black tracking-tighter uppercase">Fabio Benedetti</span>
-                    <span class="text-[10px] text-amber-500 font-bold tracking-[0.3em] uppercase">HUMANO Studio</span>
-                </div>
+  const addTestimonial = async (name, text) => {
+    if (!name || !text) return;
+    const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'config');
+    await updateDoc(configRef, { 
+      testimonials: arrayUnion({ id: Date.now(), name, text }) 
+    });
+  };
+
+  const removeTestimonial = async (item) => {
+    const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'config');
+    await updateDoc(configRef, { testimonials: arrayRemove(item) });
+  };
+
+  const navigateTo = (v) => {
+    setView(v);
+    window.scrollTo(0, 0);
+  };
+
+  // Helper para extrair ID do YouTube
+  const getYTId = (url) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  return (
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-amber-500 selection:text-black">
+      {/* Navigation */}
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled || view === 'admin' ? 'bg-zinc-950/90 backdrop-blur-md py-4 border-b border-zinc-800' : 'bg-transparent py-8'}`}>
+        <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
+          <div className="flex items-center gap-2 group cursor-pointer" onClick={() => navigateTo('portfolio')}>
+            <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform">
+              <Disc className="text-black" size={24} />
             </div>
-            
-            <div class="hidden lg:flex gap-10 items-center">
-                <a href="#home" class="text-[11px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">Início</a>
-                <a href="#about" class="text-[11px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">Biografia</a>
-                <a href="#social" class="text-[11px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">Conexão</a>
-                <a href="#contact" class="text-[11px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">Contato</a>
-                
-                <div class="h-4 w-px bg-zinc-800 mx-2"></div>
-                
-                <button class="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 border border-zinc-800 rounded-full text-[11px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all">
-                    <i data-lucide="lock" class="w-3 h-3 text-amber-500"></i> Área Exclusiva
-                </button>
+            <div className="flex flex-col leading-none">
+              <span className="text-xl font-bold tracking-tighter uppercase">Fabio Benedetti</span>
+              <span className="text-[10px] text-amber-500 font-bold tracking-widest uppercase">HUMANO Studio</span>
             </div>
+          </div>
+          
+          <div className="flex gap-4 md:gap-8 items-center">
+            <button onClick={() => navigateTo('portfolio')} className={`text-xs uppercase tracking-widest hover:text-white transition-colors ${view === 'portfolio' ? 'text-white font-bold border-b border-amber-500' : 'text-zinc-500'}`}>Site</button>
+            <button 
+              onClick={() => navigateTo('admin')} 
+              className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${view === 'admin' ? 'bg-amber-500 text-black' : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-amber-500/50'}`}
+            >
+              <Settings size={14} /> {view === 'admin' ? 'Painel Aberto' : 'Área Admin'}
+            </button>
+          </div>
         </div>
-    </nav>
+      </nav>
 
-    <main>
-        <!-- Hero Section -->
-        <section id="home" class="min-h-screen flex flex-col justify-center px-6 max-w-7xl mx-auto relative pt-20">
-            <div class="grid lg:grid-cols-2 gap-20 items-center">
-                <div class="z-10">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full mb-8">
-                        <span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
-                        <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">SÃO PAULO 2008 • ORIGINALIDADE</span>
-                    </div>
-                    <h1 class="text-6xl md:text-9xl font-black mb-8 leading-[0.9] uppercase tracking-tighter">
-                        A ALMA DA <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">MÚSICA</span> É HUMANA.
-                    </h1>
-                    <p class="text-lg md:text-2xl text-zinc-400 mb-12 max-w-lg leading-relaxed font-light">
-                        Produção musical, mixagem e masterização. O medo rouba sonhos, a música liberta-os.
-                    </p>
-                    <div class="flex flex-wrap gap-6">
-                        <a href="#social" class="px-10 py-5 bg-white text-black font-black rounded-full hover:bg-zinc-200 transition-all flex items-center gap-3 shadow-2xl">
-                            REDES OFICIAIS <i data-lucide="arrow-down-right" class="w-6 h-6"></i>
-                        </a>
-                        <button class="px-8 py-5 border border-zinc-800 rounded-full hover:bg-zinc-900 transition-all flex items-center gap-3 font-bold text-sm tracking-widest text-zinc-400">
-                            DOWNLOAD EPK <i data-lucide="download-cloud" class="w-5 h-5 text-amber-500"></i>
-                        </button>
-                    </div>
+      {view === 'portfolio' ? (
+        <main className="pt-20 animate-in fade-in duration-700">
+          {/* Hero Section */}
+          <section className="min-h-[90vh] flex flex-col justify-center px-6 max-w-6xl mx-auto relative">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div>
+                <span className="inline-block px-3 py-1 bg-zinc-800 rounded-full text-[10px] font-mono text-amber-500 mb-6 uppercase tracking-[0.3em]">
+                  • SÃO PAULO 2008 • ORIGINALIDADE
+                </span>
+                <h1 className="text-6xl md:text-8xl font-black mb-6 leading-none uppercase tracking-tighter">
+                  {siteData.heroTitle.split(' ').map((word, i) => 
+                    word.toUpperCase() === 'MÚSICA' || word.toUpperCase() === 'HUMANA.' ? 
+                    <span key={i} className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">{word} </span> : 
+                    word + ' '
+                  )}
+                </h1>
+                <p className="text-lg md:text-xl text-zinc-400 mb-10 max-w-lg leading-relaxed italic font-light">
+                  {siteData.heroDesc}
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <a href={`https://wa.me/55${siteData.phone}`} target="_blank" className="px-8 py-4 bg-amber-500 text-black font-bold rounded-full hover:bg-amber-400 transition-all flex items-center gap-2">
+                    <Smartphone size={20} /> Falar no WhatsApp
+                  </a>
                 </div>
-                
-                <div class="relative hidden lg:block">
-                    <div class="absolute -inset-20 bg-amber-500/10 rounded-full blur-[120px] animate-pulse"></div>
-                    <div class="relative aspect-square rounded-[4rem] overflow-hidden border border-white/5 bg-zinc-900/40 backdrop-blur-xl flex items-center justify-center">
-                        <div class="flex items-end gap-3 h-48 z-10">
-                            <div class="w-4 bg-amber-500/20 rounded-full waveform-bar" style="animation-delay: 0.1s"></div>
-                            <div class="w-4 bg-amber-500/40 rounded-full waveform-bar" style="animation-delay: 0.4s"></div>
-                            <div class="w-4 bg-amber-500/70 rounded-full waveform-bar" style="animation-delay: 0.2s"></div>
-                            <div class="w-4 bg-amber-500/100 rounded-full waveform-bar" style="animation-delay: 0.5s"></div>
-                            <div class="w-4 bg-amber-500/60 rounded-full waveform-bar" style="animation-delay: 0.3s"></div>
-                            <div class="w-4 bg-amber-500/30 rounded-full waveform-bar" style="animation-delay: 0.6s"></div>
-                        </div>
-                        <i data-lucide="disc" class="absolute w-[120%] h-[120%] text-white/5 animate-spin-slow pointer-events-none"></i>
-                    </div>
+              </div>
+              
+              <div className="relative group hidden md:block">
+                <div className="absolute -inset-4 bg-amber-500/10 rounded-2xl blur-3xl"></div>
+                <div className="relative aspect-square rounded-[3rem] overflow-hidden border border-zinc-800 bg-zinc-900/40 flex items-center justify-center">
+                  <div className="flex items-end gap-2 h-40">
+                    {[...Array(8)].map((_, i) => (
+                      <div key={i} className="w-3 bg-amber-500/40 rounded-full waveform-bar" style={{ animationDelay: `${i * 0.1}s` }} />
+                    ))}
+                  </div>
+                  <Disc size={200} className="absolute text-white/5 animate-spin-slow pointer-events-none" />
                 </div>
+              </div>
             </div>
-        </section>
+          </section>
 
-        <!-- Section: Biografia -->
-        <section id="about" class="py-40 border-t border-zinc-900 bg-zinc-950/50">
-            <div class="max-w-7xl mx-auto px-6">
-                <div class="grid lg:grid-cols-2 gap-24 items-start">
+          {/* Videos Section */}
+          {siteData.videos.length > 0 && (
+            <section className="py-24 border-t border-zinc-900">
+              <div className="max-w-6xl mx-auto px-6">
+                <h2 className="text-4xl font-black mb-16 uppercase italic tracking-tighter">Portfolio <span className="text-amber-500">Visual</span></h2>
+                <div className="grid md:grid-cols-2 gap-10">
+                  {siteData.videos.map((url, i) => (
+                    <div key={i} className="group">
+                      <div className="video-container shadow-2xl transition-transform group-hover:scale-[1.02]">
+                        <iframe src={`https://www.youtube.com/embed/${getYTId(url)}`} allowFullScreen></iframe>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Testimonials */}
+          {siteData.testimonials.length > 0 && (
+            <section className="py-24 bg-zinc-900/30">
+              <div className="max-w-6xl mx-auto px-6">
+                <h2 className="text-4xl font-black mb-16 uppercase text-center">O Que <span className="text-amber-500 italic">Dizem</span></h2>
+                <div className="grid md:grid-cols-3 gap-8">
+                  {siteData.testimonials.map((t, i) => (
+                    <div key={i} className="glass-card p-10 rounded-[2.5rem]">
+                      <MessageSquare className="text-amber-500 mb-6 opacity-30" size={32} />
+                      <p className="text-zinc-300 italic mb-8 leading-relaxed">"{t.text}"</p>
+                      <h4 className="font-black text-white uppercase tracking-widest text-xs">— {t.name}</h4>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Footer */}
+          <footer className="py-20 border-t border-zinc-900 text-center">
+            <div className="flex justify-center gap-6 mb-8 opacity-50">
+               <Instagram size={20} /> <Youtube size={20} /> <Smartphone size={20} />
+            </div>
+            <p className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.5em]">
+              {siteData.email} • {siteData.phone}
+            </p>
+            <button onClick={() => navigateTo('admin')} className="mt-8 text-[9px] text-zinc-800 uppercase tracking-widest hover:text-amber-500 transition-colors">Acesso ao Cérebro</button>
+          </footer>
+        </main>
+      ) : (
+        /* VIEW: ADMIN PANEL */
+        <main className="pt-32 pb-20 px-6 max-w-4xl mx-auto animate-in slide-in-from-bottom-4 duration-500">
+          <div className="flex justify-between items-center mb-12 border-b border-zinc-900 pb-8">
+            <div>
+              <h2 className="text-4xl font-black uppercase tracking-tighter leading-none">Painel <span className="text-amber-500 italic">Cérebro</span></h2>
+              <p className="text-zinc-500 text-xs mt-2 uppercase tracking-widest font-mono">Controle total do Projeto HUMANO</p>
+            </div>
+            <button onClick={handleSaveConfig} className="px-8 py-4 bg-amber-500 text-black font-black rounded-2xl flex items-center gap-2 hover:bg-amber-400 transition-all shadow-xl shadow-amber-500/20">
+              <Save size={18} /> GRAVAR TUDO
+            </button>
+          </div>
+
+          <div className="space-y-12">
+            {/* Textos Principais */}
+            <section className="glass-card p-10 rounded-[2.5rem]">
+              <h3 className="text-xl font-bold mb-8 flex items-center gap-3"><Mic2 className="text-amber-500" /> Mensagens Principais</h3>
+              <div className="space-y-6">
+                <div>
+                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Título do Topo (Hero)</label>
+                  <input 
+                    type="text" 
+                    value={siteData.heroTitle}
+                    onChange={(e) => setSiteData({...siteData, heroTitle: e.target.value})}
+                    className="w-full bg-black border border-zinc-800 p-5 rounded-2xl mt-2 outline-none focus:border-amber-500 transition-all font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Subtexto Descritivo</label>
+                  <textarea 
+                    value={siteData.heroDesc}
+                    onChange={(e) => setSiteData({...siteData, heroDesc: e.target.value})}
+                    className="w-full bg-black border border-zinc-800 p-5 rounded-2xl mt-2 h-32 outline-none focus:border-amber-500 transition-all"
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* Redes e Contactos */}
+            <section className="glass-card p-10 rounded-[2.5rem]">
+              <h3 className="text-xl font-bold mb-8 flex items-center gap-3">< smartphone className="text-amber-500" /> Redes e Contactos</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-[10px] font-black uppercase text-zinc-500">WhatsApp (Só números)</label>
+                  <input 
+                    type="text" 
+                    value={siteData.phone}
+                    onChange={(e) => setSiteData({...siteData, phone: e.target.value})}
+                    className="w-full bg-black border border-zinc-800 p-4 rounded-xl mt-2 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase text-zinc-500">E-mail Profissional</label>
+                  <input 
+                    type="text" 
+                    value={siteData.email}
+                    onChange={(e) => setSiteData({...siteData, email: e.target.value})}
+                    className="w-full bg-black border border-zinc-800 p-4 rounded-xl mt-2 outline-none"
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* Vídeos do YouTube */}
+            <section className="glass-card p-10 rounded-[2.5rem]">
+              <h3 className="text-xl font-bold mb-8 flex items-center gap-3"><Youtube className="text-amber-500" /> Galeria de Vídeos</h3>
+              <div className="flex gap-4 mb-8">
+                <input 
+                  id="video-input"
+                  type="text" 
+                  placeholder="Cole o link do YouTube aqui..." 
+                  className="flex-1 bg-black border border-zinc-800 p-4 rounded-xl outline-none"
+                />
+                <button 
+                  onClick={() => {
+                    const el = document.getElementById('video-input');
+                    addVideo(el.value);
+                    el.value = '';
+                  }}
+                  className="px-6 bg-white text-black font-black rounded-xl text-xs uppercase"
+                >Adicionar</button>
+              </div>
+              <div className="space-y-3">
+                {siteData.videos.map((v, i) => (
+                  <div key={i} className="flex justify-between items-center bg-zinc-950 p-4 rounded-xl border border-zinc-900">
+                    <span className="text-xs text-zinc-500 truncate max-w-[300px]">{v}</span>
+                    <button onClick={() => removeVideo(v)} className="text-red-500 hover:text-red-400 transition-colors">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Depoimentos */}
+            <section className="glass-card p-10 rounded-[2.5rem]">
+              <h3 className="text-xl font-bold mb-8 flex items-center gap-3"><Users className="text-amber-500" /> Depoimentos de Artistas</h3>
+              <div className="space-y-4 mb-8">
+                <input id="dep-name" type="text" placeholder="Nome do Artista" className="w-full bg-black border border-zinc-800 p-4 rounded-xl outline-none" />
+                <textarea id="dep-text" placeholder="O que ele disse sobre o HUMANO Studio..." className="w-full bg-black border border-zinc-800 p-4 rounded-xl h-24 outline-none" />
+                <button 
+                  onClick={() => {
+                    const name = document.getElementById('dep-name');
+                    const text = document.getElementById('dep-text');
+                    addTestimonial(name.value, text.value);
+                    name.value = ''; text.value = '';
+                  }}
+                  className="w-full py-4 bg-zinc-800 text-white font-black rounded-xl text-xs uppercase border border-zinc-700 hover:bg-zinc-700 transition-all"
+                >Inserir Relato</button>
+              </div>
+              <div className="grid gap-4">
+                {siteData.testimonials.map((t, i) => (
+                  <div key={i} className="bg-zinc-950 p-5 rounded-2xl border border-zinc-900 flex justify-between items-start">
                     <div>
-                        <h2 class="text-4xl font-black uppercase tracking-tighter mb-12 flex items-center gap-4">
-                            <span class="text-amber-500">/</span> TRAJETÓRIA
-                        </h2>
-                        <div class="prose prose-invert prose-lg text-zinc-400 space-y-8 font-light leading-relaxed">
-                            <p>
-                                <span class="text-white font-bold text-2xl">Fabio Benedetti</span> é produtor musical e o fundador do <strong>Projeto HUMANO</strong>. Iniciado em São Paulo em 2008, o seu estúdio nasceu com uma missão clara: produzir talentos emergentes mantendo a pureza e a originalidade de cada som.
-                            </p>
-                            <p>
-                                Localizado em Sapucaia, o estúdio é o laboratório de criação onde a técnica e a tecnologia estão sempre ao serviço da verdade do artista.
-                            </p>
-                        </div>
+                      <h5 className="font-bold text-amber-500 text-xs mb-1 uppercase tracking-widest">{t.name}</h5>
+                      <p className="text-sm text-zinc-400 italic">"{t.text}"</p>
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="glass-card p-10 rounded-[2.5rem]">
-                            <i data-lucide="mic-2" class="text-amber-500 w-10 h-10 mb-8"></i>
-                            <h3 class="text-xl font-bold uppercase mb-2 text-white tracking-tighter">Produção</h3>
-                            <p class="text-zinc-500 text-sm italic leading-relaxed">Arranjos e Direção Artística com foco na essência.</p>
-                        </div>
-                        <div class="glass-card p-10 rounded-[2.5rem]">
-                            <i data-lucide="settings-2" class="text-amber-500 w-10 h-10 mb-8"></i>
-                            <h3 class="text-xl font-bold uppercase mb-2 text-white tracking-tighter">Engenharia</h3>
-                            <p class="text-zinc-500 text-sm italic leading-relaxed">Mixagem & Masterização com padrão profissional.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+                    <button onClick={() => removeTestimonial(t)} className="text-zinc-700 hover:text-red-500">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
 
-        <!-- Section: Social Media (The "LinkTree" Style) -->
-        <section id="social" class="py-40 border-y border-zinc-900">
-            <div class="max-w-7xl mx-auto px-6 text-center">
-                <h2 class="text-5xl font-black uppercase tracking-tighter mb-4 italic">CONEXÃO HUMANA</h2>
-                <p class="text-zinc-500 uppercase tracking-widest text-xs mb-20 font-mono">Siga Fabio Benedetti nas plataformas oficiais</p>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Instagram -->
-                    <a href="https://instagram.com/fabio.humano" target="_blank" class="glass-card p-8 rounded-[2rem] flex flex-col items-center group">
-                        <div class="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center mb-6 text-[#E1306C] group-hover:bg-[#E1306C] group-hover:text-white transition-all">
-                            <svg class="brand-icon" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c.796 0 1.441.645 1.441 1.44s-.645 1.44-1.441 1.44-1.44-.645-1.44-1.44.645-1.44 1.441-1.44z"/></svg>
-                        </div>
-                        <h4 class="font-bold text-white mb-1">fabio.humano</h4>
-                        <p class="text-[10px] text-amber-500 font-black tracking-widest uppercase">548 SEGUIDORES</p>
-                    </a>
+          <div className="mt-20 text-center">
+            <button onClick={() => navigateTo('portfolio')} className="text-xs font-bold uppercase tracking-widest text-zinc-600 hover:text-white transition-colors">← Voltar para a Home Pública</button>
+          </div>
+        </main>
+      )}
 
-                    <!-- YouTube -->
-                    <a href="https://youtube.com/@fabiobndtt" target="_blank" class="glass-card p-8 rounded-[2rem] flex flex-col items-center group">
-                        <div class="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center mb-6 text-[#FF0000] group-hover:bg-[#FF0000] group-hover:text-white transition-all">
-                            <svg class="brand-icon" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.377.505 9.377.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                        </div>
-                        <h4 class="font-bold text-white mb-1">HUMANOLIVRE</h4>
-                        <p class="text-[10px] text-zinc-500 font-black tracking-widest uppercase">@fabiobndtt</p>
-                    </a>
+      <style>{`
+        @keyframes bounce { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1.5); } }
+        .animate-spin-slow { animation: spin 15s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 1.5rem; background: #000; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+      `}</style>
+    </div>
+  );
+};
 
-                    <!-- Spotify -->
-                    <a href="https://open.spotify.com/intl-pt/artist/2BIEgnchM2L1arz2Liw1aY?si=1QrULg3UTQG2VT3P5RNROw" target="_blank" class="glass-card p-8 rounded-[2rem] flex flex-col items-center group">
-                        <div class="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center mb-6 text-[#1DB954] group-hover:bg-[#1DB954] group-hover:text-white transition-all">
-                            <svg class="brand-icon" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.31c-.218.358-.684.474-1.042.256-2.858-1.747-6.456-2.143-10.693-1.176-.41.094-.816-.165-.91-.575-.094-.41.165-.816.575-.91 4.63-1.06 8.596-.612 11.814 1.354.358.218.474.684.256 1.042zm1.467-3.26c-.274.446-.85.59-1.296.315-3.27-2.008-8.253-2.593-12.118-1.417-.5.152-1.026-.134-1.178-.633-.153-.5.134-1.026.633-1.178 4.41-1.34 9.904-.678 13.638 1.61.446.275.59.85.315 1.296zm.126-3.41c-3.92-2.328-10.377-2.544-14.126-1.405-.6.182-1.234-.16-1.416-.76-.183-.602.16-1.236.76-1.418 4.316-1.31 11.45-1.05 16.002 1.652.54.32.715 1.014.394 1.554-.32.54-1.014.715-1.554.394z"/></svg>
-                        </div>
-                        <h4 class="font-bold text-white mb-1">Spotify</h4>
-                        <p class="text-[10px] text-zinc-500 font-black tracking-widest uppercase">Perfil Artista</p>
-                    </a>
-
-                    <!-- TikTok -->
-                    <a href="https://tiktok.com/@fabiohumano" target="_blank" class="glass-card p-8 rounded-[2rem] flex flex-col items-center group">
-                        <div class="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center mb-6 text-white group-hover:bg-white group-hover:text-black transition-all">
-                            <svg class="brand-icon" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.06-2.89-.35-4.2-.97-.06 3.42-.04 6.83-.04 10.25 0 1.25-.26 2.5-.83 3.61-.95 1.94-2.9 3.29-5.06 3.58-1.45.23-2.96.1-4.29-.53-2.02-.91-3.32-3.1-3.14-5.32.06-1.6.76-3.15 1.96-4.2 1.4-1.2 3.32-1.7 5.16-1.35.02 1.39.01 2.78.01 4.17-.65-.18-1.35-.19-1.99.03-1.08.35-1.81 1.43-1.73 2.56.03 1.21.9 2.29 2.1 2.47 1.12.18 2.33-.42 2.74-1.47.16-.42.21-.87.21-1.32-.01-4.9-.01-9.79-.01-14.69.01-.13-.01-.26 0-.39z"/></svg>
-                        </div>
-                        <h4 class="font-bold text-white mb-1">TikTok</h4>
-                        <p class="text-[10px] text-zinc-500 font-black tracking-widest uppercase">@fabiohumano</p>
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Section: Services -->
-        <section id="services" class="py-40 border-b border-zinc-900">
-            <div class="max-w-7xl mx-auto px-6 text-center">
-                <h2 class="text-5xl font-black uppercase tracking-tighter mb-20 tracking-widest italic">SOLUÇÕES SONORAS</h2>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="p-12 bg-zinc-900/50 rounded-[3rem] border border-zinc-800">
-                        <i data-lucide="layers" class="text-amber-500 w-12 h-12 mx-auto mb-8"></i>
-                        <h4 class="text-xl font-bold uppercase mb-4 tracking-tighter">IDENTIDADE</h4>
-                        <p class="text-zinc-500 text-sm leading-relaxed">Criação de marcas sonoras e consultoria estratégica para artistas independentes.</p>
-                    </div>
-                    <div class="p-12 bg-zinc-900/50 rounded-[3rem] border border-zinc-800">
-                        <i data-lucide="music" class="text-amber-500 w-12 h-12 mx-auto mb-8"></i>
-                        <h4 class="text-xl font-bold uppercase mb-4 tracking-tighter">GRAVAÇÃO</h4>
-                        <p class="text-zinc-500 text-sm leading-relaxed">Captação profissional em ambiente acusticamente tratado com equipamento de ponta.</p>
-                    </div>
-                    <div class="p-12 bg-zinc-900/50 rounded-[3rem] border border-zinc-800">
-                        <i data-lucide="volume-2" class="text-amber-500 w-12 h-12 mx-auto mb-8"></i>
-                        <h4 class="text-xl font-bold uppercase mb-4 tracking-tighter">FINALIZAÇÃO</h4>
-                        <p class="text-zinc-500 text-sm leading-relaxed">Mixagem e Masterização com foco em profundidade, clareza e pressão sonora.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer / Contact -->
-        <footer id="contact" class="py-40 bg-black relative">
-            <div class="max-w-7xl mx-auto px-6">
-                <div class="grid lg:grid-cols-2 gap-32">
-                    <div>
-                        <h2 class="text-7xl font-black mb-12 uppercase tracking-tighter leading-none italic">CONTATO</h2>
-                        <div class="space-y-10">
-                            <!-- WhatsApp Official -->
-                            <a href="https://wa.me/5532991064759" target="_blank" class="flex items-center gap-6 group cursor-pointer">
-                                <div class="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center group-hover:bg-[#25D366] transition-all">
-                                    <svg class="w-7 h-7 text-zinc-500 group-hover:text-white fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none mb-1">WhatsApp Oficial</p>
-                                    <p class="text-2xl font-black tracking-tight text-white">32 99106-4759</p>
-                                </div>
-                            </a>
-
-                            <div class="flex items-center gap-6 group cursor-pointer">
-                                <div class="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 transition-all">
-                                    <i data-lucide="mail" class="text-zinc-500 group-hover:text-black"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none mb-1">E-mail</p>
-                                    <p class="text-2xl font-black tracking-tight text-white italic">humanoprojeto@gmail.com</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-6 group cursor-pointer">
-                                <div class="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 transition-all">
-                                    <i data-lucide="map-pin" class="text-zinc-500 group-hover:text-black"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none mb-1">Localização</p>
-                                    <p class="text-xl font-bold text-white">Rua XV de Novembro, 89<br/>Centro, Sapucaia - RJ</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="glass-card p-12 rounded-[3rem] border-white/10">
-                        <form class="space-y-6" onsubmit="event.preventDefault();">
-                            <div class="space-y-2">
-                                <label class="text-[10px] uppercase tracking-widest font-black text-zinc-500">O Teu Projeto Musical</label>
-                                <textarea class="w-full bg-black/50 border border-zinc-800 p-6 rounded-3xl h-48 focus:border-amber-500 outline-none text-sm font-bold transition-all" placeholder="Diz-me o que tens em mente..."></textarea>
-                            </div>
-                            <button class="w-full py-6 bg-amber-500 text-black font-black rounded-3xl hover:bg-amber-400 transition-all uppercase tracking-widest text-xs shadow-xl shadow-amber-500/10">Enviar Mensagem</button>
-                        </form>
-                    </div>
-                </div>
-                
-                <div class="mt-40 pt-12 border-t border-zinc-900 text-center flex flex-col md:flex-row justify-between items-center gap-8 opacity-40">
-                    <p class="text-[9px] font-mono uppercase tracking-[0.5em]">© 2025 HUMANO STUDIO | Fabio Benedetti</p>
-                    <div class="flex gap-6">
-                        <i data-lucide="instagram" class="w-5 h-5 cursor-pointer"></i>
-                        <i data-lucide="youtube" class="w-5 h-5 cursor-pointer"></i>
-                        <i data-lucide="music" class="w-5 h-5 cursor-pointer"></i>
-                    </div>
-                </div>
-            </div>
-        </footer>
-    </main>
-
-    <script>
-        lucide.createIcons();
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 80) {
-                nav.classList.add('bg-black/90', 'backdrop-blur-xl', 'py-4', 'border-b', 'border-white/5');
-            } else {
-                nav.classList.remove('bg-black/90', 'backdrop-blur-xl', 'py-4', 'border-b', 'border-white/5');
-            }
-        });
-    </script>
-</body>
-</html>
+export default App;
