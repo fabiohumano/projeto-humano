@@ -42,17 +42,24 @@
             background: rgba(15, 15, 15, 0.7);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
         .glass-card:hover {
-            border-color: rgba(245, 158, 11, 0.3);
-            transform: translateY(-5px);
+            border-color: rgba(245, 158, 11, 0.4);
+            transform: translateY(-8px);
+            background: rgba(20, 20, 20, 0.8);
         }
 
         .bg-studio-grid {
-            background-image: radial-gradient(circle, rgba(245, 158, 11, 0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
+            background-image: radial-gradient(circle, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .brand-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
         }
     </style>
 </head>
@@ -82,7 +89,7 @@
             <div class="hidden lg:flex gap-10 items-center">
                 <a href="#home" class="text-[11px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">Início</a>
                 <a href="#about" class="text-[11px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">Biografia</a>
-                <a href="#services" class="text-[11px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">Serviços</a>
+                <a href="#social" class="text-[11px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">Conexão</a>
                 <a href="#contact" class="text-[11px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">Contato</a>
                 
                 <div class="h-4 w-px bg-zinc-800 mx-2"></div>
@@ -110,8 +117,8 @@
                         Produção musical, mixagem e masterização. O medo rouba sonhos, a música liberta-os.
                     </p>
                     <div class="flex flex-wrap gap-6">
-                        <a href="#services" class="px-10 py-5 bg-white text-black font-black rounded-full hover:bg-zinc-200 transition-all flex items-center gap-3 shadow-2xl">
-                            VER SERVIÇOS <i data-lucide="play-circle" class="w-6 h-6"></i>
+                        <a href="#social" class="px-10 py-5 bg-white text-black font-black rounded-full hover:bg-zinc-200 transition-all flex items-center gap-3 shadow-2xl">
+                            REDES OFICIAIS <i data-lucide="arrow-down-right" class="w-6 h-6"></i>
                         </a>
                         <button class="px-8 py-5 border border-zinc-800 rounded-full hover:bg-zinc-900 transition-all flex items-center gap-3 font-bold text-sm tracking-widest text-zinc-400">
                             DOWNLOAD EPK <i data-lucide="download-cloud" class="w-5 h-5 text-amber-500"></i>
@@ -122,7 +129,6 @@
                 <div class="relative hidden lg:block">
                     <div class="absolute -inset-20 bg-amber-500/10 rounded-full blur-[120px] animate-pulse"></div>
                     <div class="relative aspect-square rounded-[4rem] overflow-hidden border border-white/5 bg-zinc-900/40 backdrop-blur-xl flex items-center justify-center">
-                        <!-- Visualizer Icon (Substituindo Imagem) -->
                         <div class="flex items-end gap-3 h-48 z-10">
                             <div class="w-4 bg-amber-500/20 rounded-full waveform-bar" style="animation-delay: 0.1s"></div>
                             <div class="w-4 bg-amber-500/40 rounded-full waveform-bar" style="animation-delay: 0.4s"></div>
@@ -171,25 +177,71 @@
             </div>
         </section>
 
+        <!-- Section: Social Media (The "LinkTree" Style) -->
+        <section id="social" class="py-40 border-y border-zinc-900">
+            <div class="max-w-7xl mx-auto px-6 text-center">
+                <h2 class="text-5xl font-black uppercase tracking-tighter mb-4 italic">CONEXÃO HUMANA</h2>
+                <p class="text-zinc-500 uppercase tracking-widest text-xs mb-20 font-mono">Siga Fabio Benedetti nas plataformas oficiais</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Instagram -->
+                    <a href="https://instagram.com/fabio.humano" target="_blank" class="glass-card p-8 rounded-[2rem] flex flex-col items-center group">
+                        <div class="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center mb-6 text-[#E1306C] group-hover:bg-[#E1306C] group-hover:text-white transition-all">
+                            <svg class="brand-icon" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c.796 0 1.441.645 1.441 1.44s-.645 1.44-1.441 1.44-1.44-.645-1.44-1.44.645-1.44 1.441-1.44z"/></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-1">fabio.humano</h4>
+                        <p class="text-[10px] text-amber-500 font-black tracking-widest uppercase">548 SEGUIDORES</p>
+                    </a>
+
+                    <!-- YouTube -->
+                    <a href="https://youtube.com/@fabiobndtt" target="_blank" class="glass-card p-8 rounded-[2rem] flex flex-col items-center group">
+                        <div class="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center mb-6 text-[#FF0000] group-hover:bg-[#FF0000] group-hover:text-white transition-all">
+                            <svg class="brand-icon" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.377.505 9.377.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-1">HUMANOLIVRE</h4>
+                        <p class="text-[10px] text-zinc-500 font-black tracking-widest uppercase">@fabiobndtt</p>
+                    </a>
+
+                    <!-- Spotify -->
+                    <a href="https://open.spotify.com/intl-pt/artist/2BIEgnchM2L1arz2Liw1aY?si=1QrULg3UTQG2VT3P5RNROw" target="_blank" class="glass-card p-8 rounded-[2rem] flex flex-col items-center group">
+                        <div class="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center mb-6 text-[#1DB954] group-hover:bg-[#1DB954] group-hover:text-white transition-all">
+                            <svg class="brand-icon" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.31c-.218.358-.684.474-1.042.256-2.858-1.747-6.456-2.143-10.693-1.176-.41.094-.816-.165-.91-.575-.094-.41.165-.816.575-.91 4.63-1.06 8.596-.612 11.814 1.354.358.218.474.684.256 1.042zm1.467-3.26c-.274.446-.85.59-1.296.315-3.27-2.008-8.253-2.593-12.118-1.417-.5.152-1.026-.134-1.178-.633-.153-.5.134-1.026.633-1.178 4.41-1.34 9.904-.678 13.638 1.61.446.275.59.85.315 1.296zm.126-3.41c-3.92-2.328-10.377-2.544-14.126-1.405-.6.182-1.234-.16-1.416-.76-.183-.602.16-1.236.76-1.418 4.316-1.31 11.45-1.05 16.002 1.652.54.32.715 1.014.394 1.554-.32.54-1.014.715-1.554.394z"/></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-1">Spotify</h4>
+                        <p class="text-[10px] text-zinc-500 font-black tracking-widest uppercase">Perfil Artista</p>
+                    </a>
+
+                    <!-- TikTok -->
+                    <a href="https://tiktok.com/@fabiohumano" target="_blank" class="glass-card p-8 rounded-[2rem] flex flex-col items-center group">
+                        <div class="w-16 h-16 rounded-2xl bg-zinc-900 flex items-center justify-center mb-6 text-white group-hover:bg-white group-hover:text-black transition-all">
+                            <svg class="brand-icon" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.06-2.89-.35-4.2-.97-.06 3.42-.04 6.83-.04 10.25 0 1.25-.26 2.5-.83 3.61-.95 1.94-2.9 3.29-5.06 3.58-1.45.23-2.96.1-4.29-.53-2.02-.91-3.32-3.1-3.14-5.32.06-1.6.76-3.15 1.96-4.2 1.4-1.2 3.32-1.7 5.16-1.35.02 1.39.01 2.78.01 4.17-.65-.18-1.35-.19-1.99.03-1.08.35-1.81 1.43-1.73 2.56.03 1.21.9 2.29 2.1 2.47 1.12.18 2.33-.42 2.74-1.47.16-.42.21-.87.21-1.32-.01-4.9-.01-9.79-.01-14.69.01-.13-.01-.26 0-.39z"/></svg>
+                        </div>
+                        <h4 class="font-bold text-white mb-1">TikTok</h4>
+                        <p class="text-[10px] text-zinc-500 font-black tracking-widest uppercase">@fabiohumano</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
         <!-- Section: Services -->
-        <section id="services" class="py-40 border-y border-zinc-900">
+        <section id="services" class="py-40 border-b border-zinc-900">
             <div class="max-w-7xl mx-auto px-6 text-center">
                 <h2 class="text-5xl font-black uppercase tracking-tighter mb-20 tracking-widest italic">SOLUÇÕES SONORAS</h2>
                 <div class="grid md:grid-cols-3 gap-8">
                     <div class="p-12 bg-zinc-900/50 rounded-[3rem] border border-zinc-800">
                         <i data-lucide="layers" class="text-amber-500 w-12 h-12 mx-auto mb-8"></i>
-                        <h4 class="text-xl font-bold uppercase mb-4">IDENTIDADE</h4>
-                        <p class="text-zinc-500 text-sm leading-relaxed">Criação de marcas sonoras e consultoria para artistas independentes.</p>
+                        <h4 class="text-xl font-bold uppercase mb-4 tracking-tighter">IDENTIDADE</h4>
+                        <p class="text-zinc-500 text-sm leading-relaxed">Criação de marcas sonoras e consultoria estratégica para artistas independentes.</p>
                     </div>
                     <div class="p-12 bg-zinc-900/50 rounded-[3rem] border border-zinc-800">
                         <i data-lucide="music" class="text-amber-500 w-12 h-12 mx-auto mb-8"></i>
-                        <h4 class="text-xl font-bold uppercase mb-4">GRAVAÇÃO</h4>
-                        <p class="text-zinc-500 text-sm leading-relaxed">Captação de alta fidelidade em ambiente isolado e tratado.</p>
+                        <h4 class="text-xl font-bold uppercase mb-4 tracking-tighter">GRAVAÇÃO</h4>
+                        <p class="text-zinc-500 text-sm leading-relaxed">Captação profissional em ambiente acusticamente tratado com equipamento de ponta.</p>
                     </div>
                     <div class="p-12 bg-zinc-900/50 rounded-[3rem] border border-zinc-800">
                         <i data-lucide="volume-2" class="text-amber-500 w-12 h-12 mx-auto mb-8"></i>
-                        <h4 class="text-xl font-bold uppercase mb-4">FINALIZAÇÃO</h4>
-                        <p class="text-zinc-500 text-sm leading-relaxed">Entrega final otimizada para todas as plataformas de streaming.</p>
+                        <h4 class="text-xl font-bold uppercase mb-4 tracking-tighter">FINALIZAÇÃO</h4>
+                        <p class="text-zinc-500 text-sm leading-relaxed">Mixagem e Masterização com foco em profundidade, clareza e pressão sonora.</p>
                     </div>
                 </div>
             </div>
@@ -200,32 +252,35 @@
             <div class="max-w-7xl mx-auto px-6">
                 <div class="grid lg:grid-cols-2 gap-32">
                     <div>
-                        <h2 class="text-7xl font-black mb-12 uppercase tracking-tighter leading-none italic">VAMOS <br/>CONVERSAR?</h2>
+                        <h2 class="text-7xl font-black mb-12 uppercase tracking-tighter leading-none italic">CONTATO</h2>
                         <div class="space-y-10">
-                            <div class="flex items-center gap-6 group cursor-pointer">
-                                <div class="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 transition-colors">
-                                    <i data-lucide="phone" class="text-zinc-500 group-hover:text-black"></i>
+                            <!-- WhatsApp Official -->
+                            <a href="https://wa.me/5532991064759" target="_blank" class="flex items-center gap-6 group cursor-pointer">
+                                <div class="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center group-hover:bg-[#25D366] transition-all">
+                                    <svg class="w-7 h-7 text-zinc-500 group-hover:text-white fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">WhatsApp</p>
+                                    <p class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none mb-1">WhatsApp Oficial</p>
                                     <p class="text-2xl font-black tracking-tight text-white">32 99106-4759</p>
                                 </div>
-                            </div>
+                            </a>
+
                             <div class="flex items-center gap-6 group cursor-pointer">
-                                <div class="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 transition-colors">
+                                <div class="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 transition-all">
                                     <i data-lucide="mail" class="text-zinc-500 group-hover:text-black"></i>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">E-mail</p>
+                                    <p class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none mb-1">E-mail</p>
                                     <p class="text-2xl font-black tracking-tight text-white italic">humanoprojeto@gmail.com</p>
                                 </div>
                             </div>
+
                             <div class="flex items-center gap-6 group cursor-pointer">
-                                <div class="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 transition-colors">
+                                <div class="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 transition-all">
                                     <i data-lucide="map-pin" class="text-zinc-500 group-hover:text-black"></i>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Endereço</p>
+                                    <p class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest leading-none mb-1">Localização</p>
                                     <p class="text-xl font-bold text-white">Rua XV de Novembro, 89<br/>Centro, Sapucaia - RJ</p>
                                 </div>
                             </div>
